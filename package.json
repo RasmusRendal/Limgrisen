@@ -1,0 +1,20 @@
+{
+  "name": "kimbot2",
+  "version": "0.0.1",
+  "description": "A bot for managing CTFs",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rasmus Rendal",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "@discordjs/builders": "^0.6.0",
+    "@discordjs/rest": "^0.1.0-canary.0",
+    "discord-api-types": "^0.23.1",
+    "discord.js": "^13.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  }
+}
