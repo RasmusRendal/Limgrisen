@@ -1,5 +1,10 @@
 {
 	"guildId": "",
     "clientId": "",
-	"token": ""
+	"token": "",
+    "dblocation": "./database.sqlite",
+    "ctfadminrole": "",
+    "activectfchanname": "Current CTFs",
+    "activechallengechanname": "Active Challenges",
+    "completedchallengechanname": "Completed Challenges"
 }

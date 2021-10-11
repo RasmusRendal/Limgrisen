@@ -37,7 +37,7 @@ module.exports = {
             await createCTF(interaction.member.guild, name);
             await interaction.reply(`CTF ${name} successfully added.`);
         } else {
-            throw "Unknown subcommand";
+            throw `Unknown subcommand ${interaction.options.getSubcommand()}`;
         }
     },
 };
