@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ctfadminrole } = require('../../config.json');
-const { createCTF } = require('../ctf.js');
+const { createCTF, AlreadyExistsError } = require('../ctf.js');
 
 const ctfCommand = new SlashCommandBuilder().setName('ctf').setDescription('Add or manage CTFs');
 
@@ -34,7 +34,12 @@ module.exports = {
     async execute(interaction) {
         if (interaction.options.getSubcommand() == 'add') {
             const name = interaction.options.getString('name');
-            await createCTF(interaction.member.guild, name);
+            try {
+                await createCTF(interaction.member.guild, name);
+            } catch (AlreadyExistsError) {
+                await interaction.reply(`CTF ${name} already exists!`);
+                return;
+            }
             await interaction.reply(`CTF ${name} successfully added.`);
         } else {
             throw `Unknown subcommand ${interaction.options.getSubcommand()}`;

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { getCtfNameFromChannelId, createChallenge, markChallengeAsDone } = require("../ctf.js");
+const { getCtfNameFromChannelId, createChallenge, markChallengeAsDone, AlreadyExistsError } = require("../ctf.js");
 
 const challengeCommand = new SlashCommandBuilder().setName('challenge').setDescription('Add or manage challenges');
 
@@ -29,7 +29,11 @@ module.exports = {
             if (ctf == undefined) {
                 return await interaction.reply("⚠️ This command must be called from a CTF channel");
             }
-            await createChallenge(guild, ctf, challengeName);
+            try {
+                await createChallenge(guild, ctf, challengeName);
+            } catch (AlreadyExistsError) {
+                return await interaction.reply("⚠️ This challenge already exists");
+            }
             return await interaction.reply("Challenge channel added");
         } else if (interaction.options.getSubcommand() === 'done') {
             const res = await markChallengeAsDone(guild, interaction.channelId);
@@ -38,6 +42,8 @@ module.exports = {
             } else {
                 await interaction.reply("You must be in a challenge channel to execute this command");
             }
+            return;
         }
+        throw "Should not be hit";
     },
 }
