@@ -23,7 +23,10 @@ client.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
 
     const command = client.commands.get(interaction.commandName);
-	if (!command) return;
+	if (!command) {
+        console.log('was not a command');
+        console.log(interaction);
+    }
 
 	try {
 		await command.execute(interaction);

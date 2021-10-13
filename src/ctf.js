@@ -1,5 +1,6 @@
-const { guildId, clientId, activectfchanname, activechallengechanname, completedchallengechanname } = require('../config.json');
-const { CTF, Challenge } = require('./database.js');
+const { guildId, clientId, activectfchanname, activechallengechanname, completedchallengechanname, ctfpermissions } = require('../config.json');
+const { getChannelPermissions } = require('./roles.js');
+const { Permissions } = require('discord.js');
 
 class AlreadyExistsError extends Error {
     constructor(message) {
@@ -28,18 +29,36 @@ async function getChannelIfExists(guild, category, name) {
     return channels.find((c) => c.name === name && c.type === "GUILD_TEXT" && c.parentId == category.id );
 }
 
-async function createChannel(guild, categoryname, channelname) {
+async function createChannel(guild, ctfname, categoryname, channelname) {
     let category = await getCategory(guild, categoryname);
-    if (await getChannelIfExists(guild, category, channelname) !== undefined)
+    let existingChannel = await getChannelIfExists(guild, category, channelname)
+    if (typeof existingChannel !== 'undefined') {
+        console.log('this should really be false');
         throw new AlreadyExistsError("This channel already exists");
+    }
+
+    let permissionOverwrites = [];
+    if (ctfpermissions) {
+        permissionOverwrites.push({
+            id: guild.id,
+            deny: [Permissions.FLAGS.VIEW_CHANNEL],
+        });
+        const newPermissions = await getChannelPermissions(guild, ctfname);
+        permissionOverwrites = permissionOverwrites.concat(newPermissions);
+    }
+    console.log(permissionOverwrites);
+
     let new_channel = await guild.channels.create(channelname, {
         type: "GUILD_TEXT",
+        permissionOverwrites: permissionOverwrites,
     });
-    return await new_channel.setParent(category);
+    await new_channel.setParent(category);
+    await new_channel.permissionOverwrites.set(permissionOverwrites);
+    return new_channel;
 }
 
 async function createCTF(guild, ctfname) {
-    return await createChannel(guild, activectfchanname, ctfname);
+    return await createChannel(guild, ctfname, activectfchanname, ctfname);
 }
 
 async function getCtfNameFromChannelId(guild, channelId) {
@@ -53,7 +72,7 @@ async function getCtfNameFromChannelId(guild, channelId) {
 }
 
 async function createChallenge(guild, ctfName, challengeName) {
-    return await createChannel(guild, activechallengechanname, ctfName + "-" + challengeName);
+    return await createChannel(guild, ctfName, activechallengechanname, ctfName + "-" + challengeName);
 }
 
 async function markChallengeAsDone(guild, channelId) {

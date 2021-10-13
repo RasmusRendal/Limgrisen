@@ -36,8 +36,13 @@ module.exports = {
             const name = interaction.options.getString('name');
             try {
                 await createCTF(interaction.member.guild, name);
-            } catch (AlreadyExistsError) {
-                await interaction.reply(`CTF ${name} already exists!`);
+            } catch (err) {
+                if (err instanceof AlreadyExistsError) {
+                    await interaction.reply(`CTF ${name} already exists!`);
+                } else {
+                    await interaction.reply(`An unknown error occured`);
+                }
+                console.log(err);
                 return;
             }
             await interaction.reply(`CTF ${name} successfully added.`);

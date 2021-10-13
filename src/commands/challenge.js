@@ -31,18 +31,17 @@ module.exports = {
             }
             try {
                 await createChallenge(guild, ctf, challengeName);
+                return await interaction.reply("Challenge channel added");
             } catch (AlreadyExistsError) {
                 return await interaction.reply("⚠️ This challenge already exists");
             }
-            return await interaction.reply("Challenge channel added");
         } else if (interaction.options.getSubcommand() === 'done') {
             const res = await markChallengeAsDone(guild, interaction.channelId);
             if (res) {
-                await interaction.reply("Challenge marked as done :tada");
+                return await interaction.reply("Challenge marked as done :tada");
             } else {
-                await interaction.reply("You must be in a challenge channel to execute this command");
+                return await interaction.reply("You must be in a challenge channel to execute this command");
             }
-            return;
         }
         throw "Should not be hit";
     },
