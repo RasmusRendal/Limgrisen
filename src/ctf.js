@@ -6,13 +6,12 @@ class AlreadyExistsError extends Error {
     constructor(message) {
         super(message);
         this.name = this.constructor.name;
-        Error.captureStackTracke(this, this.constructor);
+        Error.captureStackTrace(this, this.constructor);
     }
 }
 
 async function getCategory(guild, name) {
-    let channels = await guild.channels.fetch();
-    let channel = channels.find((c) => c.name === name && c.type === "GUILD_CATEGORY" );
+    let channel = guild.channels.cache.find((c) => c.name === name && c.type === "GUILD_CATEGORY" );
     if (channel !== undefined) return channel;
 
     return await guild.channels.create(name, {
@@ -25,15 +24,13 @@ async function getCtfCategory(guild) {
 }
 
 async function getChannelIfExists(guild, category, name) {
-    let channels = await guild.channels.fetch();
-    return channels.find((c) => c.name === name && c.type === "GUILD_TEXT" && c.parentId == category.id );
+    return guild.channels.cache.find((c) => c.name === name && c.type === "GUILD_TEXT" && c.parentId == category.id );
 }
 
 async function createChannel(guild, ctfname, categoryname, channelname) {
     let category = await getCategory(guild, categoryname);
     let existingChannel = await getChannelIfExists(guild, category, channelname)
     if (typeof existingChannel !== 'undefined') {
-        console.log('this should really be false');
         throw new AlreadyExistsError("This channel already exists");
     }
 
@@ -46,7 +43,6 @@ async function createChannel(guild, ctfname, categoryname, channelname) {
         const newPermissions = await getChannelPermissions(guild, ctfname);
         permissionOverwrites = permissionOverwrites.concat(newPermissions);
     }
-    console.log(permissionOverwrites);
 
     let new_channel = await guild.channels.create(channelname, {
         type: "GUILD_TEXT",
@@ -63,8 +59,7 @@ async function createCTF(guild, ctfname) {
 
 async function getCtfNameFromChannelId(guild, channelId) {
     let category = await getCtfCategory(guild);
-    let channels = await guild.channels.fetch();
-    let channel = channels.find((c) => c.id === channelId && c.type === "GUILD_TEXT" && c.parentId === category.id );
+    let channel = guild.channels.cache.find((c) => c.id === channelId && c.type === "GUILD_TEXT" && c.parentId === category.id );
     if (channel === undefined) {
         return undefined;
     }
@@ -78,8 +73,7 @@ async function createChallenge(guild, ctfName, challengeName) {
 async function markChallengeAsDone(guild, channelId) {
     let active_category = await getCategory(guild, activechallengechanname);
     let completed_category = await getCategory(guild, completedchallengechanname);
-    let channels = await guild.channels.fetch();
-    let channel = channels.find((c) => c.id === channelId && c.type === "GUILD_TEXT" && c.parentId === active_category.id);
+    let channel = guild.channels.cache.find((c) => c.id === channelId && c.type === "GUILD_TEXT" && c.parentId === active_category.id);
     if (channel === undefined) return false;
 
     await channel.setParent(completed_category);

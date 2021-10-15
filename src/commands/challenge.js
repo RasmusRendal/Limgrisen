@@ -32,8 +32,12 @@ module.exports = {
             try {
                 await createChallenge(guild, ctf, challengeName);
                 return await interaction.reply("Challenge channel added");
-            } catch (AlreadyExistsError) {
-                return await interaction.reply("⚠️ This challenge already exists");
+            } catch (e) {
+                if (e instanceof AlreadyExistsError) {
+                    return await interaction.reply("⚠️ This challenge already exists");
+                } else {
+                    throw e;
+                }
             }
         } else if (interaction.options.getSubcommand() === 'done') {
             const res = await markChallengeAsDone(guild, interaction.channelId);

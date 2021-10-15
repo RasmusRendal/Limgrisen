@@ -37,4 +37,9 @@ client.on('interactionCreate', async interaction => {
 
 });
 
+client.on('rateLimit', async data => {
+    console.log("geez, a rate limit")
+    console.log(data);
+});
+
 client.login(token);
