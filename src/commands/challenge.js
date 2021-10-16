@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { MessageMentions: { USERS_PATTERN }} = require('discord.js');
 const { getCtfNameFromChannelId, createChallenge, markChallengeAsDone, AlreadyExistsError } = require("../ctf.js");
 
 const challengeCommand = new SlashCommandBuilder().setName('challenge').setDescription('Add or manage challenges');
@@ -15,7 +16,12 @@ challengeCommand.addSubcommand((command) =>
 challengeCommand.addSubcommand((command) =>
     command
     .setName("done")
-    .setDescription("Mark a challenge as done")
+        .setDescription("Mark a challenge as done")
+        .addStringOption(option =>
+            option.setName('credit')
+                .setDescription('Credit to those who completed the challenge')
+                .setRequired(true)
+        )
 );
 
 
@@ -41,8 +47,18 @@ module.exports = {
             }
         } else if (interaction.options.getSubcommand() === 'done') {
             const res = await markChallengeAsDone(guild, interaction.channelId);
+            let credit = interaction.options.getString('credit');
+            let users = credit.match(USERS_PATTERN);
+            console.log(users)
+            let creditString = "Challenge completed by " + users[0] + " :tada:"
+            if (users.length > 1){
+                let usersString = users.join(", ");
+                creditString = "Challenge completed by " + usersString + " :tada:"
+            } else if (!users){
+                creditString = "Challenge completed :tada:"
+            }
             if (res) {
-                return await interaction.reply("Challenge marked as done :tada");
+                return await interaction.reply(creditString);
             } else {
                 return await interaction.reply("You must be in a challenge channel to execute this command");
             }
