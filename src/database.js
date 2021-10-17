@@ -1,6 +1,6 @@
 const path = require('path');
 const { Sequelize, DataTypes } = require('sequelize');
-const { dblocation } = require('../config.json');
+const { dblocation } = require('./config.js');
 
 
 const sequelize = new Sequelize({

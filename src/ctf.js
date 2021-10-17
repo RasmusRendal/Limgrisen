@@ -1,4 +1,4 @@
-const { guildId, clientId, activectfchanname, activechallengechanname, completedchallengechanname, ctfpermissions } = require('../config.json');
+const { guildId, clientId, activectfchanname, activechallengechanname, completedchallengechanname, ctfpermissions } = require('./config.js');
 const { getChannelPermissions } = require('./roles.js');
 const { Permissions } = require('discord.js');
 

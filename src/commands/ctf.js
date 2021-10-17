@@ -1,12 +1,12 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { ctfadminrole } = require('../../config.json');
+const { ctfadminrole } = require('../config.js');
 const { createCTF, AlreadyExistsError } = require('../ctf.js');
 
 const ctfCommand = new SlashCommandBuilder().setName('ctf').setDescription('Add or manage CTFs');
 
 const permissions = [];
 if (ctfadminrole === undefined || ctfadminrole === "") {
-    Console.log("No ctfadminrole is set. Now nobody will be able to create CTFs.")
+    console.log("No ctfadminrole is set. Now nobody will be able to create CTFs.")
 } else {
     permissions.push({
         id: ctfadminrole,

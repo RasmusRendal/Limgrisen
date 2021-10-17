@@ -1,4 +1,4 @@
-const { teammemberrole } = require('../config.json');
+const { teammemberrole } = require('./config.js');
 const { Permissions } = require('discord.js');
 
 // We sort of store information in Discord channel names. But they don't support

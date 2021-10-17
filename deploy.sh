@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
-node src/deploy-commands.js
-node src/index.js 
+node src/deploy-commands.js $1
+node src/index.js $1
