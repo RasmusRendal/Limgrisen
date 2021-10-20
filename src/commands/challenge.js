@@ -20,7 +20,6 @@ challengeCommand.addSubcommand((command) =>
         .addStringOption(option =>
             option.setName('credit')
                 .setDescription('Credit to those who completed the challenge')
-                .setRequired(true)
         )
 );
 
