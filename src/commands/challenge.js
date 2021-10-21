@@ -20,7 +20,6 @@ challengeCommand.addSubcommand((command) =>
         .addStringOption(option =>
             option.setName('credit')
                 .setDescription('Credit to those who completed the challenge')
-                .setRequired(true)
         )
 );
 
@@ -48,14 +47,14 @@ module.exports = {
         } else if (interaction.options.getSubcommand() === 'done') {
             const res = await markChallengeAsDone(guild, interaction.channelId);
             let credit = interaction.options.getString('credit');
-            let users = credit.match(USERS_PATTERN);
-            console.log(users)
-            let creditString = "Challenge completed by " + users[0] + " :tada:"
-            if (users.length > 1){
-                let usersString = users.join(", ");
-                creditString = "Challenge completed by " + usersString + " :tada:"
-            } else if (!users){
-                creditString = "Challenge completed :tada:"
+            let creditString = "Challenge completed :tada:"
+            if (credit){
+                let users = credit.match(USERS_PATTERN);
+                creditString = "Challenge completed by " + users[0] + " :tada:"
+                if (users.length > 1){
+                    let usersString = users.join(", ");
+                    creditString = "Challenge completed by " + usersString + " :tada:"
+                }
             }
             if (res) {
                 return await interaction.reply(creditString);
