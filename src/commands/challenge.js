@@ -40,27 +40,25 @@ module.exports = {
             } catch (e) {
                 if (e instanceof AlreadyExistsError) {
                     return await interaction.reply("⚠️ This challenge already exists");
-                } else {
-                    throw e;
                 }
+                throw e;
             }
         } else if (interaction.options.getSubcommand() === 'done') {
             const res = await markChallengeAsDone(guild, interaction.channelId);
-            let user = '<@'+interaction.user.id+'>';
-            let credit = interaction.options.getString('credit');
+            if (!res) {
+                return await interaction.reply("You must be in a challenge channel to execute this command");
+            }
+            const user = '<@'+interaction.user.id+'>';
+            const credit = interaction.options.getString('credit');
             let creditString = "Challenge completed by " + user + " :tada:"
             if (credit){
-                let users = credit.match(USERS_PATTERN);
+                const users = credit.match(USERS_PATTERN);
                 if (users){
-                    let usersString = user + ", " + users.join(", ");
+                    const usersString = user + ", " + users.join(", ");
                     creditString = "Challenge completed by " + usersString + " :tada:"
                 } 
             }
-            if (res) {
-                return await interaction.reply(creditString);
-            } else {
-                return await interaction.reply("You must be in a challenge channel to execute this command");
-            }
+            return await interaction.reply(creditString);
         }
         throw "Should not be hit";
     },
