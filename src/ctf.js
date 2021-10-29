@@ -1,4 +1,4 @@
-const { guildId, clientId, activectfchanname, activechallengechanname, completedchallengechanname, ctfpermissions } = require('../config.json');
+const { guildId, clientId, activectfchanname, activechallengechanname, completedchallengechanname, ctfpermissions } = require('./config.js');
 const { getChannelPermissions } = require('./roles.js');
 const { Permissions } = require('discord.js');
 
@@ -48,8 +48,7 @@ async function createChannel(guild, ctfname, categoryname, channelname) {
         type: "GUILD_TEXT",
         permissionOverwrites: permissionOverwrites,
     });
-    await new_channel.setParent(category);
-    await new_channel.permissionOverwrites.set(permissionOverwrites);
+    await new_channel.setParent(category, {lockPermissions: false});
     return new_channel;
 }
 
@@ -76,7 +75,7 @@ async function markChallengeAsDone(guild, channelId) {
     let channel = guild.channels.cache.find((c) => c.id === channelId && c.type === "GUILD_TEXT" && c.parentId === active_category.id);
     if (channel === undefined) return false;
 
-    await channel.setParent(completed_category);
+    await channel.setParent(completed_category, {lockPermissions: false});
     return true;
 
 }
