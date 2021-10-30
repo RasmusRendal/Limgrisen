@@ -3,10 +3,15 @@
   "version": "0.0.1",
   "description": "A bot for managing CTFs",
   "bin": {
-      "limgrisen": "./src/main.js"
+    "limgrisen": "./src/main.js"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "__tests__/commands/mocks.js"
+    ]
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "Rasmus Rendal",
   "license": "AGPL-3.0-or-later",
@@ -17,6 +22,7 @@
     "discord.js": "^13.2.0"
   },
   "devDependencies": {
-    "eslint": "^8.0.0"
+    "eslint": "^8.0.0",
+    "jest": "^27.3.1"
   }
 }

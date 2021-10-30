@@ -38,14 +38,11 @@ module.exports = {
                 await createCTF(interaction.member.guild, name);
             } catch (err) {
                 if (err instanceof AlreadyExistsError) {
-                    await interaction.reply(`CTF ${name} already exists!`);
-                } else {
-                    await interaction.reply(`An unknown error occured`);
+                    return await interaction.reply(`CTF ${name} already exists!`);
                 }
-                console.log(err);
-                return;
+                return await interaction.reply(`An unknown error occured`);
             }
-            await interaction.reply(`CTF ${name} successfully added.`);
+            return await interaction.reply(`CTF ${name} successfully added.`);
         } else {
             throw `Unknown subcommand ${interaction.options.getSubcommand()}`;
         }
