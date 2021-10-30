@@ -1,35 +1,7 @@
 const challenge = require('../../src/commands/challenge');
+const { channel, guild, interaction } = require('./mocks');
 
 describe('Challenge command', () => {
-	const channel = {
-		name: 'cfs-challenge-tests',
-		setParent: jest.fn(),
-	};
-
-	const guild = {
-		channels: {
-			cache: {
-				find: jest.fn(),
-			},
-			create: jest.fn(),
-		},
-	};
-
-	const interaction = {
-		reply: jest.fn(),
-		member: {
-			guild: guild,
-		},
-		channelId: 'channel-id',
-		options: {
-			getSubcommand: jest.fn(),
-			getString: jest.fn(),
-		},
-		user: {
-			id: '000000000000000000',
-		},
-	};
-
 	const findMock = guild.channels.cache.find;
 	const getSubcommandMock = interaction.options.getSubcommand;
 	const getStringMock = interaction.options.getString;
@@ -122,9 +94,3 @@ describe('Challenge command', () => {
 		expect(interaction.reply).toHaveBeenCalledWith(expectedErrMsg);
 	});
 });
-
-
-
-
-
-

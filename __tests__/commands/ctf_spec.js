@@ -1,31 +1,7 @@
 const ctf = require('../../src/commands/ctf');
+const { channel, guild, interaction } = require('./mocks');
 
 describe('Ctf commands', () => {
-	const channel = {
-		name: 'ctf-channel',
-		setParent: jest.fn(),
-	};
-
-	const guild = {
-		channels: {
-			cache: {
-				find: jest.fn(),
-			},
-			create: jest.fn(),
-		},
-	};
-
-	const interaction = {
-		reply: jest.fn(),
-		options: {
-			getSubcommand: jest.fn(),
-			getString: jest.fn(),
-		},
-		member: {
-			guild: guild,
-		},
-	};
-
 	const subCmdMock = interaction.options.getSubcommand;
 	const getStringMock = interaction.options.getString;
 	const findMock = guild.channels.cache.find;

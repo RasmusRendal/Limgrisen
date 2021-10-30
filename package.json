@@ -5,6 +5,11 @@
   "bin": {
     "limgrisen": "./src/main.js"
   },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "__tests__/commands/mocks.js"
+    ]
+  },
   "scripts": {
     "test": "jest"
   },
