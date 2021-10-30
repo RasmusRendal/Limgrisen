@@ -1,96 +1,96 @@
 const challenge = require('../../src/commands/challenge');
+
 const { channel, guild, interaction } = require('./mocks');
 
-describe('Challenge command', () => {
-	const findMock = guild.channels.cache.find;
-	const getSubcommandMock = interaction.options.getSubcommand;
-	const getStringMock = interaction.options.getString;
-	const createChannelMock = guild.channels.create;
+const findMock = guild.channels.cache.find;
+const getSubcommandMock = interaction.options.getSubcommand;
+const getStringMock = interaction.options.getString;
+const createChannelMock = guild.channels.create;
 
-	beforeEach(() => {
-		jest.clearAllMocks();
-	});
+jest.mock('../../src/config', () => ({
+	ctfpermissions: false
+}));
 
-	it('should prints an error if ctf is undefined', async () => {
-		interaction.options.getSubcommand.mockReturnValueOnce('add');
-		interaction.options.getString.mockReturnValueOnce('test-challenge');
+beforeEach(() => {
+	jest.clearAllMocks();
+});
 
-		await challenge.execute(interaction);
-		expect(interaction.reply).toHaveBeenCalledWith('⚠️ This command must be called from a CTF channel');
-	});
+test('should prints an error if ctf is undefined', async () => {
+	interaction.options.getSubcommand.mockReturnValueOnce('add');
+	interaction.options.getString.mockReturnValueOnce('test-challenge');
 
-	it('should create a new challenge', async () => {
-		getSubcommandMock.mockReturnValueOnce('add');
-		getStringMock.mockReturnValueOnce('test-challenge');
+	await challenge.execute(interaction);
+	expect(interaction.reply).toHaveBeenCalledWith('⚠️ This command must be called from a CTF channel');
+});
 
-		findMock.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(undefined);
+test('should create a new challenge', async () => {
+	getSubcommandMock.mockReturnValueOnce('add');
+	getStringMock.mockReturnValueOnce('test-challenge');
 
-		createChannelMock.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel);
+	findMock.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(undefined);
 
-		await challenge.execute(interaction);
-		expect(interaction.reply).toHaveBeenCalledWith('Challenge channel added');
-	});
+	createChannelMock.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel);
 
-	it('should inform if challenge already exists', async () => {
-		getSubcommandMock.mockReturnValueOnce('add');
-		getStringMock.mockReturnValueOnce('test-challenge');
+	await challenge.execute(interaction);
+	expect(interaction.reply).toHaveBeenCalledWith('Challenge channel added');
+});
 
-		findMock.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel);
+test('should inform if challenge already exists', async () => {
+	getSubcommandMock.mockReturnValueOnce('add');
+	getStringMock.mockReturnValueOnce('test-challenge');
 
-		createChannelMock.mockReturnValueOnce(channel);
+	findMock.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel);
 
-		await challenge.execute(interaction);
-		expect(interaction.reply).toHaveBeenCalledWith('⚠️ This challenge already exists');
-	});
+	createChannelMock.mockReturnValueOnce(channel);
 
-	it('should print completion message', async () => {
-		getSubcommandMock.mockReturnValueOnce('done') // this is consumed at the if statement
-			.mockReturnValueOnce('done'); // this is consumed at the else if statement
-		getStringMock.mockReturnValueOnce('');
+	await challenge.execute(interaction);
+	expect(interaction.reply).toHaveBeenCalledWith('⚠️ This challenge already exists');
+});
 
-		findMock.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel);
+test('should print completion message', async () => {
+	getSubcommandMock.mockReturnValue('done');
+	getStringMock.mockReturnValueOnce('');
 
-		const expectedCreditString = `Challenge completed by <@${interaction.user.id}> :tada:`;
+	findMock.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel);
 
-		await challenge.execute(interaction);
-		expect(interaction.reply).toHaveBeenCalledWith(expectedCreditString);
-	});
+	const expectedCreditString = `Challenge completed by <@${interaction.user.id}> :tada:`;
 
-	it('should print completion message with multiple users', async () => {
-		getSubcommandMock.mockReturnValueOnce('done') // this is consumed at the if statement
-			.mockReturnValueOnce('done'); // this is consumed at the else if statement
-		getStringMock.mockReturnValueOnce('<@111111111111111111>, <@222222222222222222>');
+	await challenge.execute(interaction);
+	expect(interaction.reply).toHaveBeenCalledWith(expectedCreditString);
+});
 
-		findMock.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel);
-		
-		const expectedMsg = `Challenge completed by <@${interaction.user.id}>, <@111111111111111111>, <@222222222222222222> :tada:`;
+test('should print completion message with multiple users', async () => {
+	getSubcommandMock.mockReturnValue('done');
+	getStringMock.mockReturnValueOnce('<@111111111111111111>, <@222222222222222222>');
 
-		await challenge.execute(interaction);
-		expect(interaction.reply).toHaveBeenCalledWith(expectedMsg);
-	});
+	findMock.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel);
+	
+	const expectedMsg = `Challenge completed by <@${interaction.user.id}>, <@111111111111111111>, <@222222222222222222> :tada:`;
 
-	it('should print error message if not in a challenge channel', async () => {
-		getSubcommandMock.mockReturnValueOnce('done') // this is consumed at the if statement
-			.mockReturnValueOnce('done'); // this is consumed at the else if statement
-		getStringMock.mockReturnValueOnce('');
+	await challenge.execute(interaction);
+	expect(interaction.reply).toHaveBeenCalledWith(expectedMsg);
+});
 
-		findMock.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(undefined);
-		
-		const expectedErrMsg = 'You must be in a challenge channel to execute this command';
-		await challenge.execute(interaction);
-		expect(interaction.reply).toHaveBeenCalledWith(expectedErrMsg);
-	});
+test('should print error message if not in a challenge channel', async () => {
+	getSubcommandMock.mockReturnValueOnce('done');
+	getStringMock.mockReturnValueOnce('');
+
+	findMock.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(undefined);
+	
+	const expectedErrMsg = 'You must be in a challenge channel to execute this command';
+	await challenge.execute(interaction);
+	expect(interaction.reply).toHaveBeenCalledWith(expectedErrMsg);
 });

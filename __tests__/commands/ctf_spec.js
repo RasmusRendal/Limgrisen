@@ -1,39 +1,42 @@
 const ctf = require('../../src/commands/ctf');
+
 const { channel, guild, interaction } = require('./mocks');
 
-describe('Ctf commands', () => {
-	const subCmdMock = interaction.options.getSubcommand;
-	const getStringMock = interaction.options.getString;
-	const findMock = guild.channels.cache.find;
-	const createMock = guild.channels.create;
+const subCmdMock = interaction.options.getSubcommand;
+const getStringMock = interaction.options.getString;
+const findMock = guild.channels.cache.find;
+const createMock = guild.channels.create;
 
-	beforeEach(() => {
-		jest.clearAllMocks();
-	});
+jest.mock('../../src/config', () => ({
+	ctfpermissions: false
+}));
 
-	it('adds a new ctf', async () => {
-		subCmdMock.mockReturnValueOnce('add');
-		getStringMock.mockReturnValueOnce('ctf-rocks');
+beforeEach(() => {
+	jest.clearAllMocks();
+});
 
-		findMock.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(undefined);
+test('adds a new ctf', async () => {
+	subCmdMock.mockReturnValueOnce('add');
+	getStringMock.mockReturnValueOnce('ctf-rocks');
 
-		createMock.mockReturnValueOnce(channel);
+	findMock.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(undefined);
 
-		await ctf.execute(interaction);
-		expect(interaction.reply).toHaveBeenCalledWith('CTF ctf-rocks successfully added.');
-	});
+	createMock.mockReturnValueOnce(channel);
 
-	it('informs if ctf already exists', async () => {
-		subCmdMock.mockReturnValueOnce('add');
-		getStringMock.mockReturnValueOnce('ctf-rocks');
+	await ctf.execute(interaction);
+	expect(interaction.reply).toHaveBeenCalledWith('CTF ctf-rocks successfully added.');
+});
 
-		findMock.mockReturnValueOnce(channel)
-			.mockReturnValueOnce(channel);
+test('informs if ctf already exists', async () => {
+	subCmdMock.mockReturnValueOnce('add');
+	getStringMock.mockReturnValueOnce('ctf-rocks');
 
-		createMock.mockReturnValueOnce(channel);
+	findMock.mockReturnValueOnce(channel)
+		.mockReturnValueOnce(channel);
 
-		await ctf.execute(interaction);
-		expect(interaction.reply).toHaveBeenCalledWith('CTF ctf-rocks already exists!');
-	});
+	createMock.mockReturnValueOnce(channel);
+
+	await ctf.execute(interaction);
+	expect(interaction.reply).toHaveBeenCalledWith('CTF ctf-rocks already exists!');
 });
