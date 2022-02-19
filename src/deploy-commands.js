@@ -4,7 +4,7 @@ const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { clientId, guildId, token } = require('./config.js');
 
-const command_folder = __dirname + '/commands'
+const command_folder = __dirname + '/commands';
 
 const commands = [];
 const commands_json = [];
@@ -17,34 +17,25 @@ for (const file of commandFiles) {
 
 }
 
-const rest = new REST({ version: '9' }).setToken(token);
+async function deploy_commands(client) {
+	const rest = new REST({ version: '9' }).setToken(token);
+	const response = await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands_json });
 
-(async () => {
-    const response = await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands_json });
-    console.log("Registered commands");
+	permissions = [];
+	for (let i = 0; i < response.length; i++) {
+		const command = response[i];
+		const name = command.name;
+		const perms = commands[i].permissions;
+		if (perms === undefined || perms.length == 0) {
+			console.log(`No permissions to set for command ${name}`);
+			continue;
+		}
+		const guild = await client.guilds.fetch(guildId);
+		guild.commands.permissions.add({
+			command: command.id,
+			permissions: perms,
+		}).then(console.log).catch(console.error);
+	}
+}
 
-    for (const command of commands) {
-        const name = command.data.name;
-        if (command.permissions === undefined || command.permissions.length == 0) {
-            console.log(`No permissions to set for command ${name}`);
-            continue;
-        }
-        const ext_command = response.find(cmd => cmd.name === name);
-
-        if (ext_command === undefined) {
-            throw `Could not find command ${name}`;
-        }
-
-        const permissions_body = [
-            {
-                id: ext_command.id,
-                permissions: command.permissions
-            }
-        ];
-
-        await rest.put(Routes.guildApplicationCommandsPermissions(clientId, guildId),
-            { body: permissions_body },
-        );
-        console.log(`Set permissions for command ${name}`);
-    }
-})();
+module.exports = { deploy_commands };

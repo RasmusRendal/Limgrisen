@@ -1,12 +1,14 @@
 const fs = require('fs');
 const { Client, Collection, Intents } = require('discord.js');
 const { token } = require('./config.js');
-const command_folder = __dirname + '/commands'
+const command_folder = __dirname + '/commands';
+const { deploy_commands } = require('./deploy-commands');
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
-client.once('ready', () => {
+client.once('ready', async () => {
 	console.log('Ready!');
+	await deploy_commands(client);
 });
 
 client.commands = new Collection();
@@ -22,15 +24,16 @@ for (const file of commandFiles) {
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
 
-    const command = client.commands.get(interaction.commandName);
+	const command = client.commands.get(interaction.commandName);
 	if (!command) {
-        console.log('was not a command');
-        console.log(interaction);
-    }
+		console.log('was not a command');
+		console.log(interaction);
+	}
 
 	try {
 		await command.execute(interaction);
-	} catch (error) {
+	}
+	catch (error) {
 		console.error(error);
 		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 	}
@@ -38,8 +41,8 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('rateLimit', async data => {
-    console.log("geez, a rate limit")
-    console.log(data);
+	console.log('geez, a rate limit');
+	console.log(data);
 });
 
 client.login(token);
