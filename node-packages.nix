@@ -366,8 +366,8 @@ let
     };
   };
   args = {
-    name = "kimbot2";
-    packageName = "kimbot2";
+    name = "Limgrisen";
+    packageName = "Limgrisen";
     version = "0.0.1";
     src = ./.;
     dependencies = [

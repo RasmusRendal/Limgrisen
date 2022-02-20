@@ -1,9 +1,9 @@
 {
-  "name": "kimbot2",
+  "name": "Limgrisen",
   "version": "0.0.1",
   "description": "A bot for managing CTFs",
   "bin": {
-    "limgrisen": "./src/main.js"
+    "limgrisen": "./src/index.js"
   },
   "jest": {
     "testPathIgnorePatterns": [
