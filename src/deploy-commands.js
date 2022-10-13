@@ -1,6 +1,6 @@
 const fs = require("fs");
 const { SlashCommandBuilder, REST, Routes } = require("discord.js");
-const { clientId, guildId, token } = require("./config.json"); 
+const { clientId, guildId, token } = require("./config.js"); 
 
 // Getting commands from command folder
 const command_folder = __dirname + "/commands";
