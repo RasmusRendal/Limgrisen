@@ -121,3 +121,8 @@ dist
 
 config.json
 database.sqlite
+
+# Vim
+*.swp
+
+result

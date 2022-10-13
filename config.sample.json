@@ -1,12 +1,9 @@
 {
-    "guildId": "",
-    "clientId": "",
     "token": "",
-    "dblocation": "./database.sqlite",
-    "ctfadminrole": "",
-    "activectfchanname": "Current CTFs",
-    "activechallengechanname": "Active Challenges",
-    "completedchallengechanname": "Completed Challenges",
-    "ctfpermissions": false,
-    "teammemberrole": ""
+    "clientId": "",
+    "guildId": "",
+    "activeCtfChanName": "Current CTFs",
+    "activeChallengeChanName": "Active Challenges",
+    "completedChallengeChanName": "Completed Challenges",
+    "teamMemberId": ""
 }
