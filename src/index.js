@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { token } = require("./config.json")
+const { token } = require("./config.js")
 const command_folder = __dirname + "/commands";
 const { deploy_commands } = require("./deploy-commands")
 
