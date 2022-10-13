@@ -339,7 +339,7 @@ let
     };
     production = true;
     bypassCache = true;
-    reconstructLock = true;
+    reconstructLock = false;
   };
 in
 {
