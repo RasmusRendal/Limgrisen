@@ -14,3 +14,5 @@ Then you should go to the [Discord Developer Portal](https://discord.com/develop
 Then, you should add the bot to the server. You do this by following the following URL: `https://discord.com/api/oauth2/authorize?client_id=<client id>&permissions=8&scope=bot%20applications.commands` (It probably doesn't need all those permissions, but who wants to sort that out?)
 
 Copy the token, client id, guild id and team member role id into `config.json`, and then you should be able to run the bot by running `node index.js`
+
+After framework v.12, it is now required to set your "Privileged Gateway Intents" in the [Discord Developer Portal](https://discord.com/developers/). I just applied all 3, less could probably do it.
