@@ -64,15 +64,12 @@ module.exports = {
         if (interaction.options.getSubcommand() === "add") {
             const category = interaction.options.getString("category");
             let  challengeName = "";
-            console.log(category);
             if(category !== Categories.Other)
                 challengeName = interaction.options.getString("category");
             else
                 challengeName = interaction.options.getString("customcategory");
             
-            console.log(challengeName);
             challengeName += "-" +  interaction.options.getString("name");
-            console.log(challengeName);
             let ctf = await getCtfNameFromChannelId(guild, interaction.channelId);
             if (ctf === undefined) {
                 return await interaction.reply("This command must be called from a CTF channel");
