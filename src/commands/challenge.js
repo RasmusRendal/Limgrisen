@@ -40,7 +40,7 @@ module.exports = {
             } 
             try {
                 const createdChallenge = await createChallenge(guild, ctf, challengeName);
-                return await interaction.reply("Challenge <#" + createdChallenge.id + "> channel added");
+                return await interaction.reply("Challenge <#" + createdChallenge.id + "> added");
             } catch (e) {
                 if (e instanceof AlreadyExistsError) {
                     return await interaction.reply("This challenge already exists");
