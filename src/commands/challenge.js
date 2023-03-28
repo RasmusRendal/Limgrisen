@@ -75,8 +75,8 @@ module.exports = {
                 return await interaction.reply("This command must be called from a CTF channel");
             } 
             try {
-                await createChallenge(guild, ctf, challengeName);
-                return await interaction.reply("Challenge channel added");
+                const createdChallenge = await createChallenge(guild, ctf, challengeName);
+                return await interaction.reply("Challenge <#" + createdChallenge.id + "> added");
             } catch (e) {
                 if (e instanceof AlreadyExistsError) {
                     return await interaction.reply("This challenge already exists");
