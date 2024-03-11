@@ -1,0 +1,25 @@
+version: '3'
+services:
+  psybot:
+    build: .
+    env_file:
+      - ./.env
+    environment:
+      - "MONGODB_URI=mongo"
+      - "BACKUPS_DIR=/home/psybot/backups"
+    restart: unless-stopped
+    volumes:
+      - ./backups:/home/psybot/backups
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mdb:/data/db
+      - mdb_config:/data/configdb
+volumes:
+  mdb:
+  mdb_config:
