@@ -11,6 +11,7 @@ pkgs.mkShell {
     clippy
     latest.rustChannels.nightly.rust
     pkg-config
+    sqlx-cli
   ];
 
   nativeBuildInputs = with pkgs; [

@@ -9,6 +9,10 @@ use serenity::model::gateway::Ready;
 use serenity::model::id::GuildId;
 use serenity::prelude::*;
 
+mod types;
+
+use sqlx::Connection;
+
 use std::env;
 
 struct Handler;
@@ -25,9 +29,12 @@ impl EventHandler for Handler {
             };
 
             if let Some(content) = content {
-                let data = CreateInteractionResponseMessage::new().content(content);
+                let data =
+                    CreateInteractionResponseMessage::new().content(content);
                 let builder = CreateInteractionResponse::Message(data);
-                if let Err(why) = command.create_response(&ctx.http, builder).await {
+                if let Err(why) =
+                    command.create_response(&ctx.http, builder).await
+                {
                     println!("Cannot respond to slash command: {why}");
                 }
             }
@@ -45,16 +52,16 @@ impl EventHandler for Handler {
         );
 
         let commands = guild_id
-            .set_commands(&ctx.http, vec![
-                commands::ping::register()
-            ])
+            .set_commands(&ctx.http, vec![commands::ping::register()])
             .await;
 
-        println!("I now have the following guild slash commands: {commands:#?}");
+        println!(
+            "I now have the following guild slash commands: {commands:#?}"
+        );
 
         //let guild_command =
-            //Command::create_global_command(&ctx.http, commands::wonderful_command::register())
-                //.await;
+        //Command::create_global_command(&ctx.http, commands::wonderful_command::register())
+        //.await;
 
         //println!("I created the following global slash command: {guild_command:#?}");
     }
