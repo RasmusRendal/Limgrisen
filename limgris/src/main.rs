@@ -2,17 +2,20 @@ mod commands;
 
 use serenity::async_trait;
 use serenity::builder::{
-    CreateInteractionResponse, CreateInteractionResponseMessage,
+    CreateChannel, CreateInteractionResponse, CreateInteractionResponseMessage,
 };
 use serenity::model::application::{Command, Interaction};
+use serenity::model::channel::{ChannelType, GuildChannel};
 use serenity::model::gateway::Ready;
-use serenity::model::id::GuildId;
+use serenity::model::id::{ChannelId, GuildId};
 use serenity::prelude::*;
 
-mod types;
+mod lib;
+use crate::lib::types::{Category, Challenge, Ctf};
 
-use sqlx::Connection;
+use sqlx::sqlite::SqlitePool;
 
+use std::collections::HashMap;
 use std::env;
 
 struct Handler;
@@ -20,11 +23,33 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        let pool = SqlitePool::connect(&"./sqlite.db")
+            .await
+            .expect("Error connecting to database");
         if let Interaction::Command(command) = interaction {
             println!("Received command interaction: {command:#?}");
 
             let content = match command.data.name.as_str() {
                 "ping" => Some(commands::ping::run(&command.data.options())),
+                "ctf" => Some(
+                    commands::ctf::run(
+                        &pool,
+                        &ctx,
+                        &command.guild_id,
+                        &command.data.options(),
+                    )
+                    .await,
+                ),
+                "challenge" => Some(
+                    commands::challenge::run(
+                        &pool,
+                        &ctx,
+                        &command.guild_id,
+                        &command.channel_id,
+                        &command.data.options(),
+                    )
+                    .await,
+                ),
                 _ => Some("not implemented :(".to_string()),
             };
 
@@ -43,6 +68,9 @@ impl EventHandler for Handler {
 
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
+        let pool = SqlitePool::connect(&"./sqlite.db")
+            .await
+            .expect("Error connecting to database");
 
         let guild_id = GuildId::new(
             env::var("GUILD_ID")
@@ -51,13 +79,85 @@ impl EventHandler for Handler {
                 .expect("GUILD_ID must be an integer"),
         );
 
+        // TODO: do better configuration
+        let mut channel_cat_map: HashMap<String, Option<ChannelId>> =
+            HashMap::new();
+        channel_cat_map.insert("Current CTFs".to_string(), None);
+        channel_cat_map.insert("Active Challenges".to_string(), None);
+        channel_cat_map.insert("Completed Challenges".to_string(), None);
+
+        println!("Searching for Guild Categories");
+        if let Ok(channels) = guild_id.channels(&ctx.http).await {
+            let guild_categories: Vec<(&ChannelId, &GuildChannel)> = channels
+                .iter()
+                .filter(|(_, y)| y.kind == ChannelType::Category)
+                .collect();
+
+            for (channel_id, channel_info) in guild_categories {
+                if channel_cat_map.contains_key(&channel_info.name) {
+                    channel_cat_map.insert(
+                        channel_info.name.clone(),
+                        Some(channel_id.clone()),
+                    );
+                }
+            }
+        };
+
+        if channel_cat_map.iter().any(|(_, x)| *x == None) {
+            println!("Missing required categories");
+            for (name, id) in channel_cat_map.iter() {
+                if *id == None {
+                    let res = guild_id
+                        .create_channel(
+                            &ctx.http,
+                            CreateChannel::new(name)
+                                .kind(ChannelType::Category),
+                        )
+                        .await;
+                    match res {
+                        Ok(_) => println!("Created category: {}", name),
+                        Err(err) => {
+                            println!("Error creating: {} - {:?}", name, err)
+                        }
+                    }
+                }
+            }
+        }
+
+        for (key, val) in channel_cat_map.iter() {
+            if let Ok(mut conn) = pool.acquire().await {
+                if let Some(id) = val {
+                    let id_str = format!("{}", id.get());
+                    let _ = sqlx::query!(
+                        r#"
+INSERT OR REPLACE INTO config (option, value) VALUES (?1, ?2)
+"#,
+                        key,
+                        id_str
+                    )
+                    .execute(&mut *conn)
+                    .await;
+                }
+            }
+        }
+
+        println!("Categories are setup");
+
         let commands = guild_id
-            .set_commands(&ctx.http, vec![commands::ping::register()])
+            .set_commands(
+                &ctx.http,
+                vec![
+                    commands::ping::register(),
+                    commands::ctf::register(),
+                    commands::challenge::register(),
+                ],
+            )
             .await;
 
-        println!(
-            "I now have the following guild slash commands: {commands:#?}"
-        );
+        match commands {
+            Ok(result) => println!("Commands are now setup!"),
+            Err(err) => println!("Error: {:#?}", err),
+        }
 
         //let guild_command =
         //Command::create_global_command(&ctx.http, commands::wonderful_command::register())
@@ -68,16 +168,18 @@ impl EventHandler for Handler {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     let token =
         env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    let pool = SqlitePool::connect(&"./sqlite.db")
+        .await
+        .expect("Error connecting to database");
 
     // Build our client.
     let mut client = Client::builder(token, GatewayIntents::empty())
         .event_handler(Handler)
         .await
         .expect("Error creating client");
-
     // Finally, start a single shard, and start listening to events.
     //
     // Shards will automatically attempt to reconnect, and will perform exponential backoff until
@@ -85,4 +187,6 @@ async fn main() {
     if let Err(why) = client.start().await {
         println!("Client error: {why:?}");
     }
+
+    Ok(())
 }
