@@ -14,7 +14,6 @@ discord_token.nix
 guild_id.nix
 
 # Rust
-limgris/Cargo.lock
 limgris/target
 
 # Diagnostic reports (https://nodejs.org/api/report.html)

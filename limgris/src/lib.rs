@@ -3,7 +3,9 @@ pub mod types {
 
     use serenity::model::id::ChannelId;
     use sqlx::encode::IsNull;
-    use sqlx::sqlite::{SqliteArgumentValue, SqliteTypeInfo};
+    use sqlx::sqlite::{
+        SqliteArgumentValue, SqlitePoolOptions, SqliteTypeInfo,
+    };
     use sqlx::Type;
     use sqlx::{Encode, Sqlite, SqlitePool};
 
@@ -12,6 +14,7 @@ pub mod types {
         pub id: Option<i64>,
         pub snowflake: Option<String>,
         pub name: String,
+        pub is_archived: Option<i64>,
     }
 
     impl Ctf {
@@ -35,12 +38,36 @@ pub mod types {
                 id: Some(id.clone()),
                 name: name,
                 snowflake: Some(snowflake_str),
+                is_archived: Some(0),
             })
         }
 
         pub async fn fetch_all(pool: &SqlitePool) -> anyhow::Result<Vec<Self>> {
             Ok(sqlx::query_as!(Ctf, "SELECT * FROM ctfs")
                 .fetch_all(pool)
+                .await?)
+        }
+
+        pub async fn fetch_by_snowflake(
+            pool: &SqlitePool,
+            snowflake: &ChannelId,
+        ) -> anyhow::Result<Self> {
+            let snow_str = snowflake.to_string();
+            Ok(sqlx::query_as!(
+                Ctf,
+                "SELECT * FROM ctfs WHERE snowflake = ?1",
+                snow_str
+            )
+            .fetch_one(pool)
+            .await?)
+        }
+
+        pub async fn fetch_by_id(
+            pool: &SqlitePool,
+            id: i64,
+        ) -> anyhow::Result<Self> {
+            Ok(sqlx::query_as!(Ctf, "SELECT * FROM ctfs WHERE id = ?1", id)
+                .fetch_one(pool)
                 .await?)
         }
 
@@ -55,20 +82,21 @@ pub mod types {
     }
 
     #[derive(Debug)]
-    pub struct Challenge<'a> {
+    pub struct Challenge {
         pub id: Option<i64>,
-        pub snowflake: Option<ChannelId>,
+        pub snowflake: Option<String>,
         pub name: String,
         pub category: Category,
-        pub ctf: &'a Ctf,
+        pub is_archived: Option<i64>,
+        pub ctf: Box<Ctf>,
     }
 
-    impl<'a> Challenge<'a> {
+    impl Challenge {
         pub async fn create(
             pool: &SqlitePool,
             name: String,
             category: Category,
-            ctf: &'a Ctf,
+            ctf: &Ctf,
             snowflake: ChannelId,
         ) -> anyhow::Result<Self> {
             let mut conn = pool.acquire().await?;
@@ -90,11 +118,46 @@ pub mod types {
 
             Ok(Self {
                 id: Some(id),
-                snowflake: Some(snowflake),
+                snowflake: Some(snowflake_str),
                 name: name,
                 category: category,
-                ctf: ctf,
+                is_archived: Some(0),
+                ctf: Box::new(ctf.clone()),
             })
+        }
+
+        pub async fn fetch_by_snowflake(
+            pool: &SqlitePool,
+            snowflake: &ChannelId,
+        ) -> anyhow::Result<Self> {
+            let snow_str = snowflake.to_string();
+            let record = sqlx::query!(
+                "SELECT * FROM challenges WHERE snowflake = ?1 LIMIT 1",
+                snow_str
+            )
+            .fetch_one(pool)
+            .await?;
+
+            let ctf =
+                Ctf::fetch_by_id(pool, record.ctf_id).await?;
+
+            Ok(Self {
+                id: Some(record.id),
+                snowflake: Some(snow_str),
+                name: record.name,
+                category: Category::from(record.category.to_string()),
+                is_archived: record.is_archived,
+                ctf: Box::new(ctf.clone()),
+            })
+        }
+
+        pub fn channel_id(&self) -> Option<ChannelId> {
+            match &self.snowflake {
+                Some(snowflake) => {
+                    Some(ChannelId::from_str(snowflake.as_str()).expect("BBB"))
+                }
+                _ => None,
+            }
         }
     }
 

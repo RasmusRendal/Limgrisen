@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO ctfs (name, snowflake) VALUES (?1, ?2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "f37f580fa36f0ee1e4d07b1edf1eec9649b957ccd6bf2f35d9a9b8bef54e866e"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\nINSERT OR REPLACE INTO config (option, value) VALUES (?1, ?2)\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "8d3163e39c777a1d5cedde4646732cd003c2ba97bd1b28a587097c4276acfa8f"
+}

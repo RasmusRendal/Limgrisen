@@ -36,7 +36,7 @@ async fn handle_create(
     let guild_channel = guild
         .create_channel(
             &ctx.http,
-            CreateChannel::new(name.clone()).category(ChannelId::new(
+            CreateChannel::new(name).category(ChannelId::new(
                 u64::from_str(&act_cat).expect("Can't convert string to u64"),
             )),
         )
@@ -44,7 +44,7 @@ async fn handle_create(
 
     match guild_channel {
         Ok(chan) => {
-            let ctf = Ctf::create(pool, name.to_string(), chan.id).await;
+            let _ctf = Ctf::create(pool, name.to_string(), chan.id).await;
             format!("Created CTF channel {}", name).to_string()
         }
         Err(err) => {
@@ -52,6 +52,15 @@ async fn handle_create(
             "Error occured during creation of Channel, please check the logs for more details".to_string()
         }
     }
+}
+
+async fn handle_archive(
+    pool: &SqlitePool,
+    ctx: &Context,
+    guild_id: &Option<GuildId>,
+    sub_cmd: &ResolvedValue<'_>,
+) -> String {
+    "Archiving [NOT IMPLEMENTED]".to_string()
 }
 
 pub async fn run(
@@ -66,7 +75,7 @@ pub async fn run(
         "create" => {
             handle_create(pool, &ctx, &guild_id, &options[0].value).await
         }
-        "archive" => "Archiving [NOT IMPLEMENTED]".to_string(),
+        "archive" => handle_archive(pool, &ctx, &guild_id, &options[0].value).await,
         "export" => "Exporting [NOT IMPLEMENTED]".to_string(),
         _ => "Not implemented".to_string(),
     }

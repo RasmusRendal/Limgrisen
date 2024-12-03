@@ -27,6 +27,5 @@ pkgs.mkShell {
   shellHook = ''
       export DISCORD_TOKEN=${discordtoken}
       export GUILD_ID=${guildid}
-      export DATABASE_URL=sqlite:sqlite.db
   '';
 }

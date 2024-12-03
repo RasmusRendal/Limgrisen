@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO challenges (name, snowflake, category, ctf_id)\n VALUES (?1, ?2, ?3, ?4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "f7abf98e63becb74ca093ffb999eec417fa6860bbb3094ecce3e9b69046251c4"
+}

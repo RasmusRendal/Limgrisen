@@ -23,7 +23,7 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        let pool = SqlitePool::connect(&"./sqlite.db")
+        let pool = SqlitePool::connect("sqlite:memory:")
             .await
             .expect("Error connecting to database");
         if let Interaction::Command(command) = interaction {
@@ -40,16 +40,9 @@ impl EventHandler for Handler {
                     )
                     .await,
                 ),
-                "challenge" => Some(
-                    commands::challenge::run(
-                        &pool,
-                        &ctx,
-                        &command.guild_id,
-                        &command.channel_id,
-                        &command.data.options(),
-                    )
-                    .await,
-                ),
+                "challenge" => {
+                    Some(commands::challenge::run(&pool, &ctx, &command).await)
+                }
                 _ => Some("not implemented :(".to_string()),
             };
 
@@ -85,6 +78,7 @@ impl EventHandler for Handler {
         channel_cat_map.insert("Current CTFs".to_string(), None);
         channel_cat_map.insert("Active Challenges".to_string(), None);
         channel_cat_map.insert("Completed Challenges".to_string(), None);
+        channel_cat_map.insert("Archive".to_string(), None);
 
         println!("Searching for Guild Categories");
         if let Ok(channels) = guild_id.channels(&ctx.http).await {
@@ -115,7 +109,10 @@ impl EventHandler for Handler {
                         )
                         .await;
                     match res {
-                        Ok(_) => println!("Created category: {}", name),
+                        Ok(cat) => {
+                            println!("Created category: {}", name);
+                            println!("{:?}", cat)
+                        },
                         Err(err) => {
                             println!("Error creating: {} - {:?}", name, err)
                         }

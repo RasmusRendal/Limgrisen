@@ -2,7 +2,8 @@
 CREATE TABLE IF NOT EXISTS ctfs (
        id INTEGER PRIMARY KEY,
        snowflake TEXT NOT NULL,
-       name TEXT NOT NULL
+       name TEXT NOT NULL,
+       is_archived INTEGER DEFAULT 0
 );
 
 
@@ -11,7 +12,8 @@ CREATE TABLE IF NOT EXISTS challenges (
        snowflake TEXT NOT NULL,
        name TEXT NOT NULL,
        category TEXT NOT NULL,
-       ctf_id INTEGER,
+       is_archived INTEGER DEFAULT 0,
+       ctf_id INTEGER NOT NULL,
        FOREIGN KEY(ctf_id) REFERENCES ctfs(id)
 );
 
