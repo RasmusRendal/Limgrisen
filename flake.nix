@@ -90,6 +90,9 @@
             discordToken = mkOption {
               type = types.str;
             };
+            databaseUrl = mkOption {
+              type = types.str;
+            };
           };
 
           config = mkIf cfg.enable {
@@ -102,6 +105,7 @@
               environment = {
                 GUILD_ID = cfg.discordGuildId;
                 DISCORD_TOKEN = cfg.discordToken;
+                DATABASE_URL = cfg.databaseUrl;
               };
               serviceConfig = {
                 PermissionsStartOnly = true;
