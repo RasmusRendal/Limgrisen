@@ -75,7 +75,7 @@
       devShell = forAllSystems
         (system: self.${system}.limgrisen.override { inShell = true; });
       nixosModules.limgrisen = 
-        {config, lib, pkgs, ...}:
+        {config, lib, pkgs, system, ...}:
         with lib;
         let
           limgris = self.packages.${system}.limgrisen;
