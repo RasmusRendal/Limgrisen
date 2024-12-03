@@ -83,7 +83,7 @@
         {
           nixpkgs.overlays = [self.overlay];
           options.services.limgrisen = {
-            enable = mkEnable "Limgris service";
+            enable = mkEnableOption "Limgris service";
             discordGuildId = mkOption {
               type = types.str;
             };
