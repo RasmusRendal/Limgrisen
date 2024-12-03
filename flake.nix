@@ -75,10 +75,11 @@
       devShell = forAllSystems
         (system: self.${system}.limgrisen.override { inShell = true; });
       nixosModules.limgrisen = 
-        {config, lib, pkgs, system, ...}:
+        {config, lib, pkgs, ...}:
         with lib;
         let
-          limgris = self.packages.${system}.limgrisen;
+          # FIX THIS SHIT
+          limgris = self.packages.x86_64-linux.limgrisen;
           cfg = config.services.limgrisen;
         in
         {
