@@ -78,7 +78,7 @@
         {config, lib, pkgs, ...}:
         with lib;
         let
-          limgris = self.packages.${system}.limgrisen
+          limgris = self.packages.${system}.limgrisen;
           cfg = config.services.limgrisen;
         in
         {
