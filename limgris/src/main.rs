@@ -13,19 +13,24 @@ use serenity::prelude::*;
 mod lib;
 use crate::lib::types::{Category, Challenge, Ctf};
 
-use sqlx::sqlite::SqlitePool;
+use sqlx::{
+    migrate::MigrateDatabase,
+    Sqlite,
+    SqlitePool,
+    Pool,
+    Database
+};
 
 use std::collections::HashMap;
 use std::env;
 
-struct Handler;
+struct Handler {
+    pool: SqlitePool 
+}
 
 #[async_trait]
-impl EventHandler for Handler {
+impl EventHandler for Handler{
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        let pool = SqlitePool::connect("sqlite:memory:")
-            .await
-            .expect("Error connecting to database");
         if let Interaction::Command(command) = interaction {
             println!("Received command interaction: {command:#?}");
 
@@ -33,7 +38,7 @@ impl EventHandler for Handler {
                 "ping" => Some(commands::ping::run(&command.data.options())),
                 "ctf" => Some(
                     commands::ctf::run(
-                        &pool,
+                        &self.pool,
                         &ctx,
                         &command.guild_id,
                         &command.data.options(),
@@ -41,7 +46,7 @@ impl EventHandler for Handler {
                     .await,
                 ),
                 "challenge" => {
-                    Some(commands::challenge::run(&pool, &ctx, &command).await)
+                    Some(commands::challenge::run(&self.pool, &ctx, &command).await)
                 }
                 _ => Some("not implemented :(".to_string()),
             };
@@ -61,10 +66,6 @@ impl EventHandler for Handler {
 
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
-        let pool = SqlitePool::connect(&"./sqlite.db")
-            .await
-            .expect("Error connecting to database");
-
         let guild_id = GuildId::new(
             env::var("GUILD_ID")
                 .expect("Expected GUILD_ID in environment")
@@ -122,7 +123,7 @@ impl EventHandler for Handler {
         }
 
         for (key, val) in channel_cat_map.iter() {
-            if let Ok(mut conn) = pool.acquire().await {
+            if let Ok(mut conn) = self.pool.acquire().await {
                 if let Some(id) = val {
                     let id_str = format!("{}", id.get());
                     let _ = sqlx::query!(
@@ -164,17 +165,50 @@ INSERT OR REPLACE INTO config (option, value) VALUES (?1, ?2)
     }
 }
 
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let token =
         env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let pool = SqlitePool::connect(&"./sqlite.db")
+
+    let DB_URL: String = env::var("DATABASE_URL")
+        .expect("Expected \"DATABASE_URL\" in environment");
+
+
+    if !Sqlite::database_exists(&DB_URL).await.unwrap_or(false){
+        println!("Creating dabate {}", DB_URL);
+        match Sqlite::create_database(&DB_URL).await {
+            Ok(_) => println!("DB Created"),
+            Err(error) => panic!("error: {}", error)
+        }
+    }
+
+
+    let pool = SqlitePool::connect(&DB_URL)
         .await
         .expect("Error connecting to database");
 
+    let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+    let migrations = std::path::Path::new(&crate_dir).join("./migrations");
+    let migration_results = sqlx::migrate::Migrator::new(migrations)
+        .await
+        .unwrap()
+        .run(&pool)
+        .await;
+    match migration_results {
+        Ok(_) => println!("Migration success"),
+        Err(error) => {
+            panic!("error: {}", error);
+        }
+    }
+    println!("migration: {:?}", migration_results);
+
+
+
+    let handler = Handler{pool};
     // Build our client.
     let mut client = Client::builder(token, GatewayIntents::empty())
-        .event_handler(Handler)
+        .event_handler(handler)
         .await
         .expect("Error creating client");
     // Finally, start a single shard, and start listening to events.
