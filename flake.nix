@@ -78,10 +78,10 @@
         {config, lib, pkgs, ...}:
         with lib;
         let
+          limgris = self.packages.${system}.limgrisen
           cfg = config.services.limgrisen;
         in
         {
-          nixpkgs.overlays = [self.overlay];
           options.services.limgrisen = {
             enable = mkEnableOption "Limgris service";
             discordGuildId = mkOption {
@@ -113,7 +113,7 @@
                 LimitNOFILE = 1048576;
                 NoNewPrivileges = true;
                 DynamicUser = true;
-                ExecStart = ''${limgrisen}/bin/limgris'';
+                ExecStart = ''${limgris}/bin/limgris'';
                 Restart = "on-failure";
               };
             };
