@@ -62,6 +62,8 @@
 
               installPhase = ''
                 mkdir -p $out
+                mkdir -p /var/lib/limgris/
+                cp -r ./migrations /var/lib/limgris/
                 cargo install --frozen --offline --path . --root $out
                 rm $out/.crates.toml
               '';

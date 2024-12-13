@@ -36,9 +36,12 @@ async fn handle_create(
     let guild_channel = guild
         .create_channel(
             &ctx.http,
-            CreateChannel::new(name).category(ChannelId::new(
-                u64::from_str(&act_cat).expect("Can't convert string to u64"),
-            )),
+            CreateChannel::new(name)
+                .category(ChannelId::new(
+                    u64::from_str(&act_cat)
+                        .expect("Can't convert string to u64"),
+                ))
+                ,
         )
         .await;
 
