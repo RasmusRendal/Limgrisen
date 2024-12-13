@@ -188,7 +188,8 @@ async fn main() -> anyhow::Result<()> {
         .await
         .expect("Error connecting to database");
 
-    let migrations = std::path::Path::new("/var/lib/limgris").join("./migrations");
+    let crate_dir = std::env::var("LIMGRIS_LIB_DIR").unwrap();
+    let migrations = std::path::Path::new(&crate_dir).join("./migrations");
     let migration_results = sqlx::migrate::Migrator::new(migrations)
         .await
         .unwrap()

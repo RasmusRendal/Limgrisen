@@ -62,8 +62,8 @@
 
               installPhase = ''
                 mkdir -p $out
-                mkdir -p /var/lib/limgris/
-                cp -r ./migrations /var/lib/limgris/
+                mkdir -p $out/lib
+                cp -r ./migrations $out/lib
                 cargo install --frozen --offline --path . --root $out
                 rm $out/.crates.toml
               '';
@@ -109,6 +109,7 @@
                 GUILD_ID = cfg.discordGuildId;
                 DISCORD_TOKEN = cfg.discordToken;
                 DATABASE_URL = cfg.databaseUrl;
+                LIMGRIS_LIB_DIR = "${limgris}/lib";
               };
               serviceConfig = {
                 PermissionsStartOnly = true;
